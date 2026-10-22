@@ -1,266 +1,687 @@
 
-<!DOCTYPE html>
-<html lang="ta">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tamil IPTV Player</title>
 
-<!-- HLS video playback support -->
+<!doctype html>
+
+<html lang="ta">
+
+<head>
+
+<meta charset="utf-8">
+
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Tamil Live TV</title>
+
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
 <style>
+
 *{box-sizing:border-box}
+
 body{
-  margin:0;
-  background:#101116;
-  color:white;
-  font-family:Arial,sans-serif;
+
+  margin:0;background:#080b12;color:#fff;
+
+  font:15px Arial,sans-serif
+
 }
+
 header{
-  background:#191b23;
-  padding:16px;
-  font-size:22px;
-  font-weight:bold;
+
+  padding:15px;background:#111725;
+
+  display:flex;gap:12px;align-items:center;
+
+  position:sticky;top:0
+
 }
-main{padding:14px;max-width:1100px;margin:auto}
-video{
-  width:100%;
-  max-height:65vh;
-  background:#000;
-  border-radius:12px;
+
+.brand{font-size:22px;font-weight:bold}
+
+.brand b{color:#ff3158}
+
+#search{
+
+  margin-left:auto;padding:10px;
+
+  border-radius:20px;border:1px solid #333;
+
+  background:#202a3c;color:white;width:55%
+
 }
-#nowname{font-size:20px;font-weight:bold;margin:12px 0 5px}
-#status{color:#ffca6b;font-size:14px;margin:8px 0}
-.controls{display:flex;gap:10px;margin:12px 0}
+
+main{padding:16px;max-width:1400px;margin:auto}
+
+.hero{
+
+  display:grid;grid-template-columns:1.6fr 1fr;
+
+  gap:16px
+
+}
+
+.playerbox,.side{
+
+  background:#111725;border-radius:15px;overflow:hidden
+
+}
+
+video{width:100%;aspect-ratio:16/9;background:#000}
+
+.now{padding:12px}
+
 button{
-  border:0;border-radius:8px;padding:11px 16px;
-  background:#e50914;color:white;font-size:15px;
+
+  background:#253149;color:white;border:0;
+
+  border-radius:9px;padding:10px;margin:3px;
+
+  cursor:pointer
+
 }
-input{
-  width:100%;padding:13px;border-radius:8px;
-  border:1px solid #444;background:#20222b;
-  color:white;margin:10px 0;
-}
-#channels{
+
+.primary{background:#ff3158}
+
+.side{padding:20px}
+
+.side h1{font-size:30px}
+
+.muted{color:#aab3c5}
+
+.filters{display:flex;gap:6px;overflow:auto}
+
+.grid{
+
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(145px,1fr));
-  gap:10px;
+
+  grid-template-columns:repeat(5,minmax(0,1fr));
+
+  gap:10px;margin-top:15px
+
 }
+
 .channel{
-  padding:14px;background:#20222b;border-radius:10px;
-  cursor:pointer;overflow-wrap:anywhere;
+
+  background:#111725;border:1px solid #293249;
+
+  border-radius:12px;padding:12px 5px;
+
+  text-align:center;cursor:pointer;min-width:0
+
 }
-.channel:hover{background:#343746}
-.small{font-size:12px;color:#aaa}
+
+.channel:hover,.channel.selected{
+
+  border-color:#ff3158;background:#202a3c
+
+}
+
+.logo{
+
+  width:60px;height:60px;margin:auto auto 10px;
+
+  border-radius:12px;background:#253149;
+
+  display:grid;place-items:center;font-size:20px;
+
+  font-weight:bold;overflow:hidden
+
+}
+
+.logo img{width:100%;height:100%;object-fit:contain;background:white}
+
+.channel strong{
+
+  display:block;font-size:12px;
+
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap
+
+}
+
+.channel small{color:#aab3c5}
+
+.note{
+
+  margin-top:20px;padding:14px;
+
+  background:#111725;border-radius:10px;
+
+  color:#aab3c5;font-size:12px
+
+}
+
+footer{
+
+  padding:12px;text-align:center;
+
+  background:#111725;color:#aab3c5
+
+}
+
+@media(max-width:700px){
+
+  .hero{grid-template-columns:1fr}
+
+  .grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+
+  .side h1{font-size:24px}
+
+}
+
 </style>
+
 </head>
 
 <body>
-<header>📺 Tamil IPTV Player</header>
+
+<header>
+
+  <div class="brand">TAMIL<b>•</b>TV</div>
+
+  <input id="search" placeholder="சேனல் தேடவும்...">
+
+</header>
 
 <main>
-  <video id="video" controls playsinline></video>
-  <div id="nowname">ஒரு சேனலை தேர்வு செய்யவும்</div>
-  <div id="status">Playlist ஏற்றப்படுகிறது…</div>
 
-  <div class="controls">
-    <button id="prev">⏮ Previous</button>
-    <button id="next">Next ⏭</button>
+<section class="hero">
+
+  <div class="playerbox">
+
+    <video id="video" controls playsinline></video>
+
+    <div class="now">
+
+      <strong id="nowname">சேனலைத் தேர்ந்தெடுக்கவும்</strong>
+
+      <p class="muted" id="status">Tamil Live TV Player</p>
+
+      <button id="prev">‹ முந்தைய</button>
+
+      <button id="next">அடுத்த ›</button>
+
+      <button id="full">⛶ Fullscreen</button>
+
+    </div>
+
   </div>
 
-  <input id="search" placeholder="சேனல் தேடுங்கள்…">
-  <div id="channels"></div>
+  <div class="side">
+
+    <h1>உங்கள் தமிழ் TV ஒரே இடத்தில்!</h1>
+
+    <p class="muted">
+
+      உங்களுக்குப் பிடித்த சேனலைத் தேர்ந்தெடுத்து
+
+      பார்க்கலாம். Search செய்து சேனல்களைத் தேடலாம்.
+
+    </p>
+
+    <p>⭐ முக்கிய சேனல்கள் முதலில் காட்டப்படும்.</p>
+
+  </div>
+
+</section>
+
+<h2>⭐ சேனல்கள்</h2>
+
+<div class="filters" id="filters">
+
+  <button data-filter="all">அனைத்தும்</button>
+
+  <button data-filter="popular">முக்கியம்</button>
+
+  <button data-filter="entertainment">Entertainment</button>
+
+  <button data-filter="news">News</button>
+
+  <button data-filter="music">Music</button>
+
+</div>
+
+<div class="grid" id="channels">
+
+  <p>சேனல்கள் ஏற்றப்படுகின்றன...</p>
+
+</div>
+
+<div class="note">
+
+  குறிப்பு: சில stream-கள் வேலை செய்யாமல் இருக்கலாம்.
+
+  அது CORS, geo-block, DRM அல்லது காலாவதியான link
+
+  காரணமாக இருக்கலாம். அனுமதிக்கப்பட்ட stream-களை மட்டும் பயன்படுத்தவும்.
+
+</div>
+
 </main>
 
+<footer>⌂ Home　 |　 ▦ Channels　 |　 ♡ Favorites</footer>
+
 <script>
+
 const PLAYLIST =
+
   "https://iptv-org.github.io/iptv/languages/tam.m3u";
 
-const video = document.getElementById("video");
-const statusEl = document.getElementById("status");
-const channelsEl = document.getElementById("channels");
+const priority = [
+
+  "Sun TV",
+
+  "Star Vijay",
+
+  "Vijay TV",
+
+  "Zee Tamil",
+
+  "KTV",
+
+  "Sun TV HD",
+
+  "Star Vijay Super",
+
+  "Vijay Super",
+
+  "Colors Tamil",
+
+  "Kalaignar TV",
+
+  "Polimer TV",
+
+  "Thanthi TV",
+
+  "Puthiya Thalaimurai",
+
+  "News 7 Tamil",
+
+  "News18 Tamil Nadu",
+
+  "Sun News",
+
+  "Sun Music",
+
+  "Adithya TV"
+
+];
+
+const video = document.querySelector("#video");
+
+const grid = document.querySelector("#channels");
+
+const search = document.querySelector("#search");
 
 let channels = [];
+
+let filtered = [];
+
 let current = -1;
+
+let filter = "all";
+
 let hls = null;
 
-function status(message){
-  statusEl.textContent = message;
+function category(name) {
+
+  if (/news|thanthi|polimer|puthiya/i.test(name))
+
+    return "news";
+
+  if (/music|isai|fm/i.test(name))
+
+    return "music";
+
+  return "entertainment";
+
 }
 
-function parseM3U(text){
+function parseM3U(text) {
+
   const lines = text.split(/\r?\n/);
+
   const result = [];
-  let name = "";
 
-  for(const raw of lines){
-    const line = raw.trim();
+  let meta = "";
 
-    if(line.startsWith("#EXTINF")){
-      const match = line.match(/,(.*)$/);
-      name = match ? match[1].trim() : "Unknown Channel";
-    }else if(line && !line.startsWith("#") && name){
-      result.push({name, url:line});
-      name = "";
+  for (const line of lines) {
+
+    const s = line.trim();
+
+    if (s.startsWith("#EXTINF")) {
+
+      meta = s;
+
+    } else if (s.startsWith("http")) {
+
+      const name = meta.includes(",")
+
+        ? meta.slice(meta.lastIndexOf(",") + 1).trim()
+
+        : "Channel " + (result.length + 1);
+
+      const logo =
+
+        (meta.match(/tvg-logo="([^"]+)"/i) || [])[1] || "";
+
+      result.push({
+
+        name,
+
+        url: s,
+
+        logo,
+
+        category: category(name)
+
+      });
+
+      meta = "";
+
     }
+
   }
 
   return result;
+
 }
 
-function render(){
-  const query = document.getElementById("search")
-    .value.toLowerCase();
+function escapeHTML(text) {
 
-  channelsEl.innerHTML = "";
+  return String(text).replace(/[&<>"']/g, char => ({
 
-  channels.forEach((channel,index)=>{
-    if(!channel.name.toLowerCase().includes(query)) return;
+    "&":"&amp;",
 
-    const item = document.createElement("div");
-    item.className = "channel";
-    item.innerHTML =
-      `<strong></strong><div class="small">Live TV</div>`;
+    "<":"&lt;",
 
-    item.querySelector("strong").textContent = channel.name;
-    item.onclick = ()=>play(index);
+    ">":"&gt;",
 
-    channelsEl.appendChild(item);
+    '"':"&quot;",
+
+    "'":"&#39;"
+
+  }[char]));
+
+}
+
+function rank(name) {
+
+  const n = name.toLowerCase();
+
+  const index = priority.findIndex(
+
+    item => n.includes(item.toLowerCase())
+
+  );
+
+  return index === -1 ? 999 : index;
+
+}
+
+function render() {
+
+  const q = search.value.trim().toLowerCase();
+
+  filtered = channels.filter(c => {
+
+    const matchesSearch = c.name.toLowerCase().includes(q);
+
+    const matchesFilter =
+
+      filter === "all" ||
+
+      (filter === "popular" && rank(c.name) < 999) ||
+
+      c.category === filter;
+
+    return matchesSearch && matchesFilter;
+
   });
-}
 
-function play(index){
-  if(index < 0 || index >= channels.length) return;
+  grid.innerHTML = "";
 
-  current = index;
-  const channel = channels[index];
+  if (!filtered.length) {
 
-  document.getElementById("nowname").textContent =
-    channel.name;
+    grid.innerHTML =
 
-  status("Stream திறக்கப்படுகிறது…");
+      '<div class="note">சேனல்கள் கிடைக்கவில்லை.</div>';
 
-  if(hls){
-    hls.destroy();
-    hls = null;
+    return;
+
   }
 
+  filtered.forEach(c => {
+
+    const index = channels.indexOf(c);
+
+    const card = document.createElement("div");
+
+    card.className =
+
+      "channel" + (index === current ? " selected" : "");
+
+    const logo = c.logo
+
+      ? `<img src="${escapeHTML(c.logo)}" alt=""
+
+           onerror="this.remove()">`
+
+      : escapeHTML(c.name.slice(0, 2).toUpperCase());
+
+    card.innerHTML = `
+
+      <div class="logo">${logo}</div>
+
+      <strong>${escapeHTML(c.name)}</strong>
+
+      <small>${rank(c.name) < 999 ? "⭐ முக்கியம்" : "Tamil TV"}</small>
+
+    `;
+
+    card.onclick = () => play(index);
+
+    grid.appendChild(card);
+
+  });
+
+}
+
+function setStatus(text) {
+
+  document.querySelector("#status").textContent = text;
+
+}
+
+function play(index) {
+
+  if (index < 0 || index >= channels.length) return;
+
+  current = index;
+
+  const channel = channels[index];
+
+  document.querySelector("#nowname").textContent = channel.name;
+
+  setStatus("Stream ஏற்றப்படுகிறது...");
+
   video.pause();
+
   video.removeAttribute("src");
+
   video.load();
 
-  video.onerror = ()=>{
-    status("Stream இயங்கவில்லை. Link expired, blocked அல்லது unsupported ஆக இருக்கலாம்.");
-  };
+  if (hls) {
 
-  video.onplaying = ()=>{
-    status("▶ Live stream இயங்குகிறது");
-  };
+    hls.destroy();
 
-  video.onwaiting = ()=>{
-    status("Buffering…");
-  };
+    hls = null;
 
-  const isHLS = /\.m3u8($|[?#])/i.test(channel.url);
+  }
 
-  if(isHLS && video.canPlayType("application/vnd.apple.mpegurl")){
-    // Native HLS: iPhone / Safari
+  video.onerror = () =>
+
+    setStatus("Stream இயங்கவில்லை. வேறு சேனலை முயற்சிக்கவும்.");
+
+  video.onplaying = () => setStatus("▶ Live stream இயங்குகிறது");
+
+  const isHLS = /\.m3u8([?#]|$)/i.test(channel.url);
+
+  if (isHLS && video.canPlayType("application/vnd.apple.mpegurl")) {
+
     video.src = channel.url;
-    video.play().catch(()=>{
-      status("Play அழுத்தி முயற்சிக்கவும்.");
-    });
 
-  }else if(isHLS && window.Hls && Hls.isSupported()){
-    // HLS.js: compatible Chrome, Firefox, Edge
-    hls = new Hls({
-      enableWorker:true,
-      lowLatencyMode:false,
-      manifestLoadingTimeOut:20000,
-      fragLoadingTimeOut:30000
-    });
+    video.play().catch(() =>
+
+      setStatus("Play பட்டனை அழுத்தவும்.")
+
+    );
+
+  } else if (isHLS && window.Hls && Hls.isSupported()) {
+
+    hls = new Hls();
 
     hls.loadSource(channel.url);
+
     hls.attachMedia(video);
 
-    hls.on(Hls.Events.MANIFEST_PARSED,()=>{
-      video.play().catch(()=>{
-        status("Stream தயார். Play அழுத்தவும்.");
-      });
+    hls.on(Hls.Events.MANIFEST_PARSED, () => {
+
+      video.play().catch(() =>
+
+        setStatus("Play பட்டனை அழுத்தவும்.")
+
+      );
+
     });
 
-    hls.on(Hls.Events.ERROR,(_event,data)=>{
-      if(!data.fatal) return;
+    hls.on(Hls.Events.ERROR, (_event, data) => {
 
-      if(data.type === Hls.ErrorTypes.NETWORK_ERROR){
-        status("Network error. மீண்டும் முயற்சிக்கிறது…");
-        hls.startLoad();
-      }else if(data.type === Hls.ErrorTypes.MEDIA_ERROR){
-        status("Media error. சரிசெய்ய முயற்சிக்கிறது…");
-        hls.recoverMediaError();
-      }else{
-        status("Stream திறக்கவில்லை. Link அல்லது server பிரச்சினையாக இருக்கலாம்.");
+      if (data.fatal) {
+
+        setStatus("Stream திறக்கவில்லை. வேறு சேனலை முயற்சிக்கவும்.");
+
         hls.destroy();
+
         hls = null;
+
       }
+
     });
 
-  }else{
-    // Direct MP4 or other browser-supported media
+  } else {
+
     video.src = channel.url;
-    video.load();
-    video.play().catch(()=>{
-      status("Play அழுத்தவும். இந்த format ஆதரிக்கப்படாமல் இருக்கலாம்.");
-    });
+
+    video.play().catch(() =>
+
+      setStatus("Play பட்டனை அழுத்தவும்.")
+
+    );
+
   }
 
   render();
+
 }
 
-document.getElementById("prev").onclick = ()=>{
-  if(current > 0) play(current-1);
+document.querySelector("#prev").onclick = () => {
+
+  if (channels.length)
+
+    play((current - 1 + channels.length) % channels.length);
+
 };
 
-document.getElementById("next").onclick = ()=>{
-  if(current < channels.length-1) play(current+1);
+document.querySelector("#next").onclick = () => {
+
+  if (channels.length)
+
+    play((current + 1) % channels.length);
+
 };
 
-document.getElementById("search").addEventListener("input",render);
+document.querySelector("#full").onclick = () => {
 
-async function loadPlaylist(){
-  try{
-    const response = await fetch(PLAYLIST);
+  if (video.requestFullscreen)
 
-    if(!response.ok) throw new Error("Playlist fetch failed");
+    video.requestFullscreen();
 
-    const text = await response.text();
+  else if (video.webkitEnterFullscreen)
+
+    video.webkitEnterFullscreen();
+
+};
+
+search.addEventListener("input", render);
+
+document.querySelector("#filters").addEventListener("click", e => {
+
+  const button = e.target.closest("button");
+
+  if (!button) return;
+
+  filter = button.dataset.filter;
+
+  render();
+
+});
+
+fetch(PLAYLIST)
+
+  .then(response => {
+
+    if (!response.ok) throw Error("Playlist error");
+
+    return response.text();
+
+  })
+
+  .then(text => {
+
     channels = parseM3U(text);
 
-    // Popular movie and Tamil channels first
-    const priority = [
-      "Sony PIX","Star Movies","Sun TV","Zee Tamil",
-      "KTV","Vijay TV","Star Vijay","Colors Tamil"
-    ];
+    channels.sort((a, b) =>
 
-    channels.sort((a,b)=>{
-      const ai = priority.findIndex(n=>
-        a.name.toLowerCase().includes(n.toLowerCase()));
-      const bi = priority.findIndex(n=>
-        b.name.toLowerCase().includes(n.toLowerCase()));
+      rank(a.name) - rank(b.name) ||
 
-      return (ai < 0 ? 999 : ai) -
-             (bi < 0 ? 999 : bi);
-    });
+      a.name.localeCompare(b.name)
+
+    );
 
     render();
-    status(channels.length + " சேனல்கள் ஏற்றப்பட்டன");
 
-  }catch(error){
-    status("Playlist ஏற்ற முடியவில்லை. Internet அல்லது CORS பிரச்சினை இருக்கலாம்.");
-  }
-}
+    setStatus(channels.length
 
-loadPlaylist();
+      ? channels.length + " சேனல்கள் கிடைத்தன"
+
+      : "சேனல்கள் கிடைக்கவில்லை");
+
+  })
+
+  .catch(() => {
+
+    grid.innerHTML = `
+
+      <div class="note">
+
+        Playlist தானாக ஏற்றப்படவில்லை.<br>
+
+        <a href="${PLAYLIST}" target="_blank" rel="noreferrer">
+
+          Tamil M3U Playlist திறக்கவும்
+
+        </a>
+
+      </div>
+
+    `;
+
+    setStatus("Network / CORS பிரச்சினை இருக்கலாம்.");
+
+  });
+
 </script>
+
 </body>
+
 </html>
