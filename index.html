@@ -1,0 +1,341 @@
+
+
+<!DOCTYPE html>
+
+<html lang="ta">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Tamil TV Player</title>
+
+  <style>
+
+    body {
+
+      margin: 0;
+
+      background: #080b12;
+
+      color: white;
+
+      font-family: Arial, sans-serif;
+
+    }
+
+    header {
+
+      padding: 18px;
+
+      background: #111725;
+
+      display: flex;
+
+      justify-content: space-between;
+
+      align-items: center;
+
+    }
+
+    .brand {
+
+      font-size: 24px;
+
+      font-weight: bold;
+
+      color: #ff3158;
+
+    }
+
+    input {
+
+      padding: 10px;
+
+      border-radius: 20px;
+
+      border: 0;
+
+      width: 45%;
+
+    }
+
+    main { padding: 16px; }
+
+    video {
+
+      width: 100%;
+
+      background: black;
+
+      border-radius: 12px;
+
+    }
+
+    .controls {
+
+      display: flex;
+
+      gap: 8px;
+
+      margin: 12px 0;
+
+    }
+
+    button {
+
+      background: #253149;
+
+      color: white;
+
+      border: 0;
+
+      padding: 12px;
+
+      border-radius: 8px;
+
+      cursor: pointer;
+
+    }
+
+    .channels {
+
+      display: grid;
+
+      grid-template-columns: repeat(3, 1fr);
+
+      gap: 12px;
+
+    }
+
+    .channel {
+
+      background: #111725;
+
+      border-radius: 12px;
+
+      padding: 15px 5px;
+
+      text-align: center;
+
+      cursor: pointer;
+
+    }
+
+    .logo {
+
+      font-size: 24px;
+
+      margin-bottom: 10px;
+
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+<header>
+
+  <div class="brand">TAMIL TV</div>
+
+  <input id="search" placeholder="Search channels...">
+
+</header>
+
+<main>
+
+  <h2>📺 Live TV</h2>
+
+  <video id="player" controls playsinline></video>
+
+  <div id="nowPlaying">சேனலைத் தேர்ந்தெடுக்கவும்</div>
+
+  <div class="controls">
+
+    <button onclick="previousChannel()">◀ Previous</button>
+
+    <button onclick="nextChannel()">Next ▶</button>
+
+  </div>
+
+  <h2>⭐ முக்கிய சேனல்கள்</h2>
+
+  <div class="channels" id="channels"></div>
+
+</main>
+
+<script>
+
+const playlistURL =
+
+  "https://iptv-org.github.io/iptv/languages/tam.m3u";
+
+let channels = [];
+
+let current = 0;
+
+async function loadPlaylist() {
+
+  try {
+
+    const response = await fetch(playlistURL);
+
+    if (!response.ok) throw new Error("Playlist unavailable");
+
+    const text = await response.text();
+
+    const lines = text.split(/\r?\n/);
+
+    let name = "";
+
+    lines.forEach(line => {
+
+      line = line.trim();
+
+      if (line.startsWith("#EXTINF")) {
+
+        name = line.split(",").pop().trim();
+
+      } else if (line.startsWith("http")) {
+
+        channels.push({ name, url: line });
+
+      }
+
+    });
+
+    // முக்கிய சேனல்களை முதலில் காட்டவும்
+
+    const priority = [
+
+      "Sun TV", "Zee Tamil", "Vijay TV",
+
+      "Star Vijay", "KTV", "Sun Music"
+
+    ];
+
+    channels.sort((a, b) => {
+
+      const ai = priority.findIndex(n =>
+
+        a.name.toLowerCase().includes(n.toLowerCase()));
+
+      const bi = priority.findIndex(n =>
+
+        b.name.toLowerCase().includes(n.toLowerCase()));
+
+      return (ai < 0 ? 999 : ai) -
+
+             (bi < 0 ? 999 : bi);
+
+    });
+
+    renderChannels();
+
+  } catch (error) {
+
+    document.getElementById("channels").innerHTML =
+
+      "Playlist ஏற்ற முடியவில்லை. இணைய இணைப்பைச் சரிபார்க்கவும்.";
+
+  }
+
+}
+
+function renderChannels() {
+
+  const query = document.getElementById("search")
+
+    .value.toLowerCase();
+
+  const container = document.getElementById("channels");
+
+  container.innerHTML = "";
+
+  channels.forEach((channel, index) => {
+
+    if (!channel.name.toLowerCase().includes(query)) return;
+
+    const card = document.createElement("div");
+
+    card.className = "channel";
+
+    card.innerHTML =
+
+      `<div class="logo">📺</div>
+
+       <strong>${escapeHTML(channel.name)}</strong>`;
+
+    card.onclick = () => playChannel(index);
+
+    container.appendChild(card);
+
+  });
+
+}
+
+function escapeHTML(value) {
+
+  return value.replace(/[&<>"']/g, char => ({
+
+    "&": "&amp;", "<": "&lt;", ">": "&gt;",
+
+    '"': "&quot;", "'": "&#39;"
+
+  })[char]);
+
+}
+
+function playChannel(index) {
+
+  if (!channels.length) return;
+
+  current = (index + channels.length) % channels.length;
+
+  const channel = channels[current];
+
+  const player = document.getElementById("player");
+
+  player.src = channel.url;
+
+  player.play().catch(() => {
+
+    document.getElementById("nowPlaying").textContent =
+
+      channel.name + " — stream இயங்கவில்லை அல்லது ஆதரிக்கப்படவில்லை.";
+
+  });
+
+  document.getElementById("nowPlaying").textContent =
+
+    "தேர்ந்தெடுத்த சேனல்: " + channel.name;
+
+}
+
+function nextChannel() {
+
+  playChannel(current + 1);
+
+}
+
+function previousChannel() {
+
+  playChannel(current - 1);
+
+}
+
+document.getElementById("search")
+
+  .addEventListener("input", renderChannels);
+
+loadPlaylist();
+
+</script>
+
+</body>
+
+</html>
